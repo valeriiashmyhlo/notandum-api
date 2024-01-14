@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  db:
+    # build: ./app/database
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: database
+    # volumes:
+    #   - ./app/database/create_tasks.sql:/docker-entrypoint-initdb.d/create_tasks.sql
+
+  # postgres:
+  #   image: cimg/postgres:15.4
+  #   ports:
+  #     - "54320:5432"
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_DB: a2a
+  #   healthcheck:
+  #     test: ["CMD", "echo", "pg_isready", "-d", "a2a"]
+  #     interval: 3s
+  #     timeout: 10s
+  #     retries: 30
