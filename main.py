@@ -1,6 +1,6 @@
 from typing import Generic, List, TypeVar
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import UUID4, BaseModel
 from app import models, schemas, db
@@ -33,6 +33,10 @@ app.add_middleware(
 ResponsePayload = TypeVar("ResponsePayload")
 
 
+class BaseRecord(BaseModel):
+    content: str
+
+
 class Record(BaseModel):
     id: UUID4
     content: str
@@ -42,7 +46,6 @@ class Record(BaseModel):
 class TaskNew(BaseModel):
     name: str
     description: str
-    records: List[str]
 
 
 class Task(TaskNew):
@@ -67,20 +70,49 @@ async def get_task(id: UUID4, connection: Session = Depends(get_db)):
     return db.get_task(db=connection, task_id=id)
 
 
-@app.delete("/task/{id}", response_model=Task)
+@app.delete("/task/{id}")
 async def get_task(id: UUID4, connection: Session = Depends(get_db)):
     return db.delete_task(db=connection, task_id=id)
 
 
-@app.put("/task/create")
-async def create_task(task: TaskNew, connection: Session = Depends(get_db)):
+@app.post("/task/create")
+async def create_task(
+    name: str = Form(...),
+    description: str = Form(...),
+    file: UploadFile = File(...),
+    connection: Session = Depends(get_db),
+):
+    records = list(filter(None, (await file.read()).decode("utf-8").split("\n")))
     new_task = db.create_new_task(
         db=connection,
-        task=schemas.TaskBase(name=task.name, description=task.description),
+        task=schemas.TaskBase(name=name, description=description),
     )
-    for record in task.records:
+    for record in records:
+        record_parsed = BaseRecord.model_validate_json(record)
         db.create_new_record(
             db=connection,
-            record=schemas.RecordBase(content=record, task_id=new_task.id),
+            record=schemas.RecordBase(
+                content=record_parsed.content, task_id=new_task.id
+            ),
         )
     return "success"
+
+
+@app.put("/task/{id}/update", response_model=Task)
+async def update_task(id: UUID4, task: TaskNew, connection: Session = Depends(get_db)):
+    updated_task = db.update_task(
+        db=connection,
+        task=schemas.Task(id=id, name=task.name, description=task.description),
+    )
+    return updated_task
+
+
+class UploadedRecord(BaseModel):
+    content: str
+
+
+@app.post("/upload")
+async def upload_record(file: UploadFile):
+    records = await file.read()
+    print(records)
+    return {"filename": file.filename}

@@ -12,7 +12,10 @@ class Task(Base):
     description = Column(String, index=True)
 
     records = relationship(
-        "Record", back_populates="task", cascade="all, delete-orphan"
+        "Record",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
 
@@ -21,6 +24,13 @@ class Record(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     content = Column(Unicode(200), index=True)
-    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.id"), index=True)
 
-    task = relationship("Task", back_populates="records", lazy="joined", innerjoin=True)
+    task_id = Column(
+        UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), index=True
+    )
+    task = relationship(
+        "Task",
+        back_populates="records",
+        lazy="joined",
+        innerjoin=True,
+    )
