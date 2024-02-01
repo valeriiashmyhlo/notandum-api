@@ -1,7 +1,10 @@
-from typing import Generic, List, TypeVar
+import json
+from typing import Generic, List, Optional, TypeVar
+import uuid
 
 from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import UUID4, BaseModel
 from app import models, schemas, db
 from app.database import SessionLocal, engine
@@ -33,6 +36,15 @@ app.add_middleware(
 ResponsePayload = TypeVar("ResponsePayload")
 
 
+class BaseLabel(BaseModel):
+    content: str
+    record_id: UUID4
+
+
+class Label(BaseLabel):
+    id: UUID4
+
+
 class BaseRecord(BaseModel):
     content: str
 
@@ -51,6 +63,9 @@ class TaskNew(BaseModel):
 class Task(TaskNew):
     id: UUID4
     records: List[Record]
+    next_record_id: Optional[UUID4]
+    total_records: int
+    total_labels: int
 
 
 class Response(GenericModel, Generic[ResponsePayload]):
@@ -85,8 +100,14 @@ async def create_task(
     records = list(filter(None, (await file.read()).decode("utf-8").split("\n")))
     new_task = db.create_new_task(
         db=connection,
-        task=schemas.TaskBase(name=name, description=description),
+        task=schemas.TaskBase(
+            name=name,
+            description=description,
+            total_records=len(records),
+            total_labels=0,
+        ),
     )
+
     for record in records:
         record_parsed = BaseRecord.model_validate_json(record)
         db.create_new_record(
@@ -95,6 +116,8 @@ async def create_task(
                 content=record_parsed.content, task_id=new_task.id
             ),
         )
+
+    db.set_next_record_id(db=connection, task_id=new_task.id)
     return "success"
 
 
@@ -107,12 +130,42 @@ async def update_task(id: UUID4, task: TaskNew, connection: Session = Depends(ge
     return updated_task
 
 
-class UploadedRecord(BaseModel):
-    content: str
+@app.get("/records/{id}", response_model=Record)
+async def get_task_list(
+    id: UUID4,
+    skip: int = 0,
+    limit: int = 100,
+    connection: Session = Depends(get_db),
+):
+    return db.get_record(db=connection, id=id, skip=skip, limit=limit)
 
 
-@app.post("/upload")
-async def upload_record(file: UploadFile):
-    records = await file.read()
-    print(records)
-    return {"filename": file.filename}
+@app.post("/label/create")
+async def create_label(
+    label: schemas.LabelCreate, connection: Session = Depends(get_db)
+):
+    db.create_new_label(db=connection, label=label)
+    return "success"
+
+
+@app.get("/task/{id}/record/next", response_model=Record)
+async def get_record_next(
+    id: UUID4,
+    connection: Session = Depends(get_db),
+):
+    return db.get_next_record_to_label(db=connection, task_id=id)
+
+
+async def records_streamer(id, connection):
+    for record in db.get_records_labeled(db=connection, task_id=id):
+        yield json.dumps(record.serialize()) + "\n"
+
+
+@app.get("/task/{id}/labels.jsonl")
+async def export_labels(
+    id: UUID4,
+    connection: Session = Depends(get_db),
+):
+    return StreamingResponse(
+        records_streamer(id, connection), media_type="application/x-ndjson"
+    )
