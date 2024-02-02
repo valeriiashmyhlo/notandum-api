@@ -4,6 +4,10 @@ services:
     build: .
     ports:
       - 8000:8000
+    environment:
+      DATABASE_URL: postgresql://user:pass@db:5432/database
+    depends_on:
+      - db
 
   db:
     # build: ./app/database
