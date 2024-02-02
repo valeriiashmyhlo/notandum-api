@@ -18,11 +18,8 @@ app = FastAPI()
 
 
 def get_db():
-    db = SessionLocal()
-    try:
+    with SessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
 
 app.add_middleware(
