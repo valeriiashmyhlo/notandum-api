@@ -8,12 +8,12 @@ import json
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(String, primary_key=True, index=True)
-    # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    # id = Column(String, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String, index=True)
-    description = Column(String, index=True)
-    next_record_id = Column(String, index=True)
-    # next_record_id = Column(UUID(as_uuid=True), index=True)
+    description = Column(String(500), index=True)
+    # next_record_id = Column(String, index=True)
+    next_record_id = Column(UUID(as_uuid=True), index=True)
     total_records = Column(Integer, index=True)
     total_labels = Column(Integer, index=True)
 
@@ -28,16 +28,18 @@ class Task(Base):
 class Record(Base):
     __tablename__ = "records"
 
-    id = Column(String, primary_key=True, index=True)
-    # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    # id = Column(String, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     content = Column(Unicode(500), index=True)
     status = Column(String, index=True)
 
     task_id = Column(
-        String,
+        # String,
+        # ForeignKey("tasks.id", ondelete="CASCADE"),
+        # index=True
+        UUID(as_uuid=True),
         ForeignKey("tasks.id", ondelete="CASCADE"),
-        index=True
-        # UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), index=True
+        index=True,
     )
     task = relationship(
         "Task",
@@ -63,15 +65,17 @@ class Record(Base):
 class Label(Base):
     __tablename__ = "labels"
 
-    id = Column(String, primary_key=True, index=True)
-    # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    # id = Column(String, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     content = Column(Unicode(500), index=True)
 
     record_id = Column(
-        String,
+        # String,
+        # ForeignKey("records.id", ondelete="CASCADE"),
+        # index=True
+        UUID(as_uuid=True),
         ForeignKey("records.id", ondelete="CASCADE"),
-        index=True
-        # UUID(as_uuid=True), ForeignKey("records.id", ondelete="CASCADE"), index=True
+        index=True,
     )
     record = relationship(
         "Record",

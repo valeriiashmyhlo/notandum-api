@@ -4,19 +4,19 @@ from pydantic import UUID4, BaseModel
 
 class LabelCreate(BaseModel):
     content: str
-    record_id: str
-    # record_id: UUID4
+    # record_id: str
+    record_id: UUID4
 
     class Config:
         orm_mode = True
 
 
 class Label(BaseModel):
-    id: str
-    # id: UUID4
+    # id: str
+    id: UUID4
     content: str
-    record_id: str
-    # record_id: UUID4
+    # record_id: str
+    record_id: UUID4
 
     class Config:
         orm_mode = True
@@ -24,8 +24,8 @@ class Label(BaseModel):
 
 class RecordBase(BaseModel):
     content: str
-    task_id: str
-    # task_id: UUID4
+    # task_id: str
+    task_id: UUID4
 
     class Config:
         orm_mode = True
@@ -36,8 +36,8 @@ class RecordCreate(RecordBase):
 
 
 class Record(RecordBase):
-    id: str
-    # id: UUID4
+    # id: str
+    id: UUID4
 
     class Config:
         orm_mode = True
@@ -60,8 +60,8 @@ class TaskCreate(TaskBase):
 
 
 class Task(TaskBase):
-    id: str
-    # id: UUID4
+    # id: str
+    id: UUID4
 
     class Config:
         orm_mode = True

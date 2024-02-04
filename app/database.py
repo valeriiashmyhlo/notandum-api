@@ -1,15 +1,8 @@
 from sqlalchemy import create_engine, event
-from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-
-# db_name = "database"
-# db_user = "user"
-# db_pass = "pass"
-# db_host = "localhost"
-# db_port = "5432"
 
 # db_sqlite_string = "sqlite:///db.sqlite".format(
 #     db_user, db_pass, db_host, db_port, db_name
@@ -19,7 +12,6 @@ import os
 # )
 
 engine = create_engine(os.environ["DATABASE_URL"])
-
 
 # @event.listens_for(Engine, "connect")
 # def set_sqlite_pragma(db_connection, connection_record):

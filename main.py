@@ -1,10 +1,9 @@
 import json
 from typing import Generic, List, Optional, TypeVar
-import uuid
 
 from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from pydantic import UUID4, BaseModel
 from app import models, schemas, db
 from app.database import SessionLocal, engine
