@@ -4,7 +4,6 @@ from pydantic import UUID4, BaseModel
 
 class LabelCreate(BaseModel):
     content: str
-    # record_id: str
     record_id: UUID4
 
     class Config:
@@ -12,10 +11,8 @@ class LabelCreate(BaseModel):
 
 
 class Label(BaseModel):
-    # id: str
     id: UUID4
     content: str
-    # record_id: str
     record_id: UUID4
 
     class Config:
@@ -24,7 +21,6 @@ class Label(BaseModel):
 
 class RecordBase(BaseModel):
     content: str
-    # task_id: str
     task_id: UUID4
 
     class Config:
@@ -36,7 +32,6 @@ class RecordCreate(RecordBase):
 
 
 class Record(RecordBase):
-    # id: str
     id: UUID4
 
     class Config:
@@ -49,7 +44,6 @@ class TaskBase(BaseModel):
     records: List[Record] = []
     total_records: int = 0
     total_labels: int = 0
-    # next_record_id: UUID4
 
     class Config:
         orm_mode = True
@@ -60,7 +54,6 @@ class TaskCreate(TaskBase):
 
 
 class Task(TaskBase):
-    # id: str
     id: UUID4
 
     class Config:

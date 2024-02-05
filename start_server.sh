@@ -1,8 +1,7 @@
-#!/bin/bash
-# entrypoint.sh
+set -e
 
 # Run database migrations
 alembic upgrade head
 
 # Start your application
-exec uvicorn main:app --host 0.0.0.0
+uvicorn main:app --host 0.0.0.0

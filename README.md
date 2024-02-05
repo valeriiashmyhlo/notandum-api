@@ -1,13 +1,13 @@
-An API for a simple notation tool using FastAPI and PostgreSQL.
+An API for a simple annotation tool using FastAPI and PostgreSQL.
 
-#### Run locally
+### Run locally
 
-To run API:
+#### To run API:
 ```
 docker-compose up --build
 ```
-You can the access it to http://127.0.0.1:8000/
+You can the access it at http://127.0.0.1:8000/
 
-To run UI:
+#### To run UI:
 
 Follow the instructions in the [UI](https://github.com/valeriiashmyhlo/notandum) repository.
