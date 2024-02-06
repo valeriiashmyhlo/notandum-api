@@ -1,3 +1,4 @@
+from typing import List
 import uuid
 from sqlalchemy.orm import Session
 from . import models, schemas
@@ -75,6 +76,11 @@ def create_new_record(db: Session, record: schemas.RecordBase):
     db.add(db_record)
     db.commit()
     return db_record
+
+
+def create_new_records_bulk(db: Session, records: List[schemas.RecordBase]):
+    db.bulk_insert_mappings(models.Record, records)
+    db.commit()
 
 
 def create_new_label(db: Session, label: schemas.LabelCreate):

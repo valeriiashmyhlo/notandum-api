@@ -104,15 +104,15 @@ async def create_task(
         ),
     )
 
-    for record in records:
-        record_parsed = BaseRecord.model_validate_json(record)
-        db.create_new_record(
-            db=connection,
-            record=schemas.RecordBase(
-                content=record_parsed.content, task_id=new_task.id
-            ),
+    records_to_insert = [
+        schemas.RecordBase(
+            content=BaseRecord.model_validate_json(record).content, task_id=new_task.id
         )
+        for record in records
+        if record
+    ]
 
+    db.create_new_records_bulk(db=connection, records=records_to_insert)
     db.set_next_record_id(db=connection, task_id=new_task.id)
     return "success"
 
